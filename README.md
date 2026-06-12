@@ -43,6 +43,12 @@ A Python application for managing chat conversations with a local LLM using Olla
    python app_llm.py
    ```
 
+5. **Run the web UI**:
+   ```bash
+   python web_ui.py
+   ```
+   Then open `http://localhost:5000` in your browser.
+
 ## Usage
 
 - Launch the app to see a menu of existing threads

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>LLM Thread Index</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; }
+      .thread-list { margin-bottom: 2rem; }
+      .thread-list li { margin: 0.5rem 0; }
+      .card { border: 1px solid #ddd; padding: 1rem; border-radius: 6px; }
+      .button { display:inline-block; padding:0.5rem 1rem; background:#2a6df4; color:#fff; text-decoration:none; border-radius:4px; }
+      form input { padding: 0.5rem; width: 280px; }
+    </style>
+  </head>
+  <body>
+    <h1>LLM Thread Index</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="card" style="background:#f8f8f8; margin-bottom:1rem;">
+          {% for msg in messages %}
+            <p>{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="card thread-list">
+      <h2>Threads</h2>
+      <ul>
+        {% if threads %}
+          {% for thread_id, thread_name in threads %}
+            <li><a href="{{ url_for('view_thread', thread_id=thread_id) }}">{{ thread_name }}</a></li>
+          {% endfor %}
+        {% else %}
+          <li>No threads available.</li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Create a new thread</h2>
+      <form action="{{ url_for('new_thread') }}" method="post">
+        <input name="thread_name" placeholder="Thread name" />
+        <button class="button" type="submit">Create Thread</button>
+      </form>
+    </div>
+  </body>
+</html>

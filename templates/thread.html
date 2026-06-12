@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ thread_name }}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; }
+      .thread-nav { margin-bottom: 1rem; }
+      .message { border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; max-width: 720px; }
+      .message-content { white-space: pre-wrap; }
+      .user { background:#eaf3ff; }
+      .assistant { background:#f2f2f2; }
+      .controls { margin-top: 1rem; }
+      .button { display:inline-block; padding:0.5rem 1rem; background:#2a6df4; color:#fff; text-decoration:none; border-radius:4px; margin-right:0.5rem; }
+      .form-row { margin:0.75rem 0; }
+    </style>
+  </head>
+  <body>
+    <div class="thread-nav">
+      <a class="button" href="{{ url_for('index') }}">Back to index</a>
+      <a class="button" href="{{ url_for('reload_thread', thread_id=thread_id) }}">Reload Thread</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div style="background:#f8f8f8; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+          {% for msg in messages %}
+            <p>{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <h1>{{ thread_name }}</h1>
+
+    <div class="card" style="padding:1rem; margin-bottom:2rem;">
+      <h2>Messages</h2>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message {{ message.role }}">
+            <strong>{{ message.role.capitalize() }}:</strong>
+            <div class="message-content">{{ message.content }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No messages yet. Send the first message below.</p>
+      {% endif %}
+    </div>
+
+    <form id="message-form" action="{{ url_for('send_message', thread_id=thread_id) }}" method="post">
+      <div class="form-row">
+        <textarea name="message" rows="4" cols="80" placeholder="Type your message here" style="padding:0.75rem; width:100%;"></textarea>
+      </div>
+      <button class="button" type="submit">Send Message</button>
+    </form>
+
+    <div class="card" style="margin-top:2rem; padding:1rem;">
+      <h2>Thread actions</h2>
+      <form action="{{ url_for('rename_thread_route', thread_id=thread_id) }}" method="post" style="margin-bottom:1rem;">
+        <input name="new_name" placeholder="Rename thread" style="padding:0.5rem; width:240px;" />
+        <button class="button" type="submit">Rename</button>
+      </form>
+      <form action="{{ url_for('delete_thread_route', thread_id=thread_id) }}" method="post">
+        <button class="button" style="background:#d63447;" type="submit">Delete Thread</button>
+      </form>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("message-form");
+        if (!form) return;
+
+        form.addEventListener("submit", async function(event) {
+          event.preventDefault();
+          const textarea = form.querySelector("textarea[name=message]");
+          const submitButton = form.querySelector("button[type=submit]");
+          const message = textarea.value.trim();
+          if (!message) {
+            alert("Enter a message before sending.");
+            return;
+          }
+
+          submitButton.disabled = true;
+          submitButton.textContent = "Sending...";
+
+          try {
+            const response = await fetch(form.action, {
+              method: "POST",
+              body: new FormData(form),
+              credentials: "same-origin"
+            });
+            if (response.ok) {
+              window.location.href = "{{ url_for('view_thread', thread_id=thread_id) }}";
+            } else {
+              alert("Unable to send message. Please try again.");
+              submitButton.disabled = false;
+              submitButton.textContent = "Send Message";
+            }
+          } catch (error) {
+            alert("Error sending message: " + error);
+            submitButton.disabled = false;
+            submitButton.textContent = "Send Message";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

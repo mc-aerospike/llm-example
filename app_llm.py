@@ -59,6 +59,27 @@ def save_chat_history(client, thread_id, history):
     bins = {"messages": history}
     client.put(key, bins)
 
+def create_thread(client, name=None):
+    """Creates a new thread and stores it in the index."""
+    if not name:
+        name = f"Untitled Thread ({uuid.uuid4().hex[:6]})"
+    new_id = f"thread_{uuid.uuid4().hex[:12]}"
+    threads = get_thread_index(client)
+    threads[new_id] = name
+    save_thread_index(client, threads)
+    return new_id, name
+
+def set_thread_name(client, thread_id, new_name):
+    """Renames a thread in the index without interactive input."""
+    if not new_name:
+        return False
+    threads = get_thread_index(client)
+    if thread_id in threads:
+        threads[thread_id] = new_name
+        save_thread_index(client, threads)
+        return True
+    return False
+
 def delete_thread(client, thread_id, thread_name):
     """Deletes a thread and its chat history from Aerospike"""
     try:
